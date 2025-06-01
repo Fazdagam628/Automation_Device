@@ -233,7 +233,7 @@ function toggleMode() {
     });
 }
 
-setInterval(getData, 10000);
+setInterval(getData, 500000);
 getData();
 getLed1();
 getRelay();
