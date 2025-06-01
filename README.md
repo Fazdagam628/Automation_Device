@@ -18,7 +18,9 @@ This project is a **web-based dashboard** for monitoring and controlling IoT dev
 ## 📁 Project Structure
 
 ├── index.html # Main frontend dashboard page
+
 ├── main.js # JavaScript logic for fetching data and device control
+
 ├── automationTest.ino # Microcontroller code for ESP32/ESP8266
 
 ---
