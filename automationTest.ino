@@ -8,11 +8,14 @@ WebServer server(80);
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
-const char* ssid = "Indihon";
-const char* password = "12233344";
+const char *ssid = "Indihon";
+const char *password = "12233344";
+// const char *ssid = "Redmi Note 13 Pro 5G";
+// const char *password = "123456789";
 
 int ledPin1 = 19;
 int ledPinFlash = 18;
+int ledPinWiFi = 27;
 int pirPin = 26;
 int RELAY_PIN = 17;
 
@@ -22,7 +25,6 @@ bool relayState = false;
 bool autoMode = true;                      // Default: auto mode
 unsigned long lastMotionTime = 0;          // Waktu terakhir gerakan terdeteksi
 const unsigned long motionTimeout = 5000;  // 5000 ms = 5 detik
-
 
 // Forward declaration
 void handleRoot();
@@ -85,6 +87,8 @@ void ledSetup() {
   digitalWrite(ledPin1, LOW);
   pinMode(ledPinFlash, OUTPUT);
   digitalWrite(ledPinFlash, LOW);
+  pinMode(ledPinWiFi, OUTPUT);
+  digitalWrite(ledPinWiFi, LOW);
 }
 
 void relaySetup() {
@@ -93,13 +97,13 @@ void relaySetup() {
   relayState = false;
 }
 
-
 void pirSetup() {
   pinMode(pirPin, INPUT_PULLDOWN);
 }
 
 void readPirMove() {
-  if (!autoMode) return;  // Abaikan PIR jika mode manual
+  if (!autoMode)
+    return;  // Abaikan PIR jika mode manual
 
   int val = digitalRead(pirPin);
 
@@ -117,16 +121,16 @@ void readPirMove() {
   }
 }
 
-
 void wiFiSetup() {
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
-    digitalWrite(ledPinFlash, HIGH);
+    digitalWrite(ledPinWiFi, HIGH);
   }
 
+  digitalWrite(ledPinWiFi, LOW);
   Serial.println("");
   Serial.println("Connected to WiFi!");
   Serial.println(WiFi.localIP());
@@ -141,7 +145,7 @@ void reconnectWiFi() {
   {
     delay(1000);
     Serial.print(".");
-    digitalWrite(ledPinFlash, !digitalRead(ledPinFlash));  // LED berkedip
+    digitalWrite(ledPinWiFi, !digitalRead(ledPinWiFi)); // LED berkedip
     // retryCount++;
   }
 
@@ -149,7 +153,7 @@ void reconnectWiFi() {
     Serial.println("");
     Serial.println("Reconnected to WiFi!");
     Serial.println(WiFi.localIP());
-    digitalWrite(ledPinFlash, LOW);  // Matikan LED berkedip jika reconnect berhasil
+    digitalWrite(ledPinWiFi, LOW);  // Matikan LED berkedip jika reconnect berhasil
   } else {
     Serial.println("");
     Serial.println("Failed to reconnect to WiFi.");
@@ -192,8 +196,6 @@ void loop() {
   server.handleClient();
 }
 
-
-
 void setLed1() {
   led1State = !led1State;
 
@@ -232,8 +234,10 @@ void setMode() {
   if (server.hasArg("mode")) {
     String modeArg = server.arg("mode");
     if (modeArg == "AUTO") {
+      digitalWrite(ledPinFlash, HIGH);
       autoMode = true;
     } else if (modeArg == "MANUAL") {
+      digitalWrite(ledPinFlash, LOW);
       autoMode = false;
     }
   }
