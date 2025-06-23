@@ -31,16 +31,17 @@ int RELAY_PIN = 17;
 bool led1State = false;
 bool relayState = false;
 
-bool autoMode = true;                      // Default: auto mode
-unsigned long lastMotionTime = 0;          // Waktu terakhir gerakan terdeteksi
-const unsigned long motionTimeout = 5000;  // 5000 ms = 5 detik
+bool autoMode = true;                     // Default: auto mode
+unsigned long lastMotionTime = 0;         // Waktu terakhir gerakan terdeteksi
+const unsigned long motionTimeout = 5000; // 5000 ms = 5 detik
 
 // Forward declaration
 void handleRoot();
 void handleInfo();
 
 // Endpoint: /
-void handleRoot() {
+void handleRoot()
+{
   String html = R"rawliteral(
     <!DOCTYPE html>
     <html>
@@ -64,7 +65,8 @@ void handleRoot() {
 }
 
 // Endpoint: /info
-void handleInfo() {
+void handleInfo()
+{
   String info = "WiFi SSID: ";
   info += ssid;
   info += "<br>IP Address: ";
@@ -73,11 +75,13 @@ void handleInfo() {
   server.send(200, "text/html", info);
 }
 
-void readDHT11() {
+void readDHT11()
+{
   float t = dht.readTemperature();
   float h = dht.readHumidity();
 
-  if (isnan(t) || isnan(h)) {
+  if (isnan(t) || isnan(h))
+  {
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(500, "application/json", "{\"error\":\"Sensor error\"}");
     return;
@@ -88,10 +92,12 @@ void readDHT11() {
   server.send(200, "application/json", json);
 }
 
-void dhtSetup() {
+void dhtSetup()
+{
   dht.begin();
 }
-void ledSetup() {
+void ledSetup()
+{
   pinMode(ledPin1, OUTPUT);
   digitalWrite(ledPin1, LOW);
   pinMode(ledPinFlash, OUTPUT);
@@ -100,40 +106,49 @@ void ledSetup() {
   digitalWrite(ledPinWiFi, LOW);
 }
 
-void relaySetup() {
+void relaySetup()
+{
   pinMode(RELAY_PIN, OUTPUT);
-  digitalWrite(RELAY_PIN, HIGH);  // OFF saat awal (relay aktif LOW)
+  digitalWrite(RELAY_PIN, HIGH); // OFF saat awal (relay aktif LOW)
   relayState = false;
 }
 
-void pirSetup() {
+void pirSetup()
+{
   pinMode(pirPin, INPUT_PULLDOWN);
 }
 
-void readPirMove() {
+void readPirMove()
+{
   if (!autoMode)
-    return;  // Abaikan PIR jika mode manual
+    return; // Abaikan PIR jika mode manual
 
   int val = digitalRead(pirPin);
 
-  if (val == HIGH) {
+  if (val == HIGH)
+  {
     digitalWrite(ledPinFlash, HIGH);
     relayState = true;
-    digitalWrite(RELAY_PIN, LOW);  // Aktifkan relay
-    lastMotionTime = millis();     // Simpan waktu gerakan
-  } else {
-    if (relayState && (millis() - lastMotionTime >= motionTimeout)) {
+    digitalWrite(RELAY_PIN, LOW); // Aktifkan relay
+    lastMotionTime = millis();    // Simpan waktu gerakan
+  }
+  else
+  {
+    if (relayState && (millis() - lastMotionTime >= motionTimeout))
+    {
       relayState = false;
-      digitalWrite(RELAY_PIN, HIGH);  // Matikan relay
+      digitalWrite(RELAY_PIN, HIGH); // Matikan relay
       digitalWrite(ledPinFlash, LOW);
     }
   }
 }
 
-void wiFiSetup() {
+void wiFiSetup()
+{
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(1000);
     Serial.print(".");
     digitalWrite(ledPinWiFi, HIGH);
@@ -144,75 +159,87 @@ void wiFiSetup() {
   Serial.println("Connected to WiFi!");
   Serial.println(WiFi.localIP());
 }
-void reconnectWiFi() {
+void reconnectWiFi()
+{
   Serial.println("WiFi disconnected. Attempting to reconnect...");
-  WiFi.disconnect();  // Putuskan koneksi dulu untuk reset
+  WiFi.disconnect(); // Putuskan koneksi dulu untuk reset
   WiFi.begin(ssid, password);
 
   // int retryCount = 0;
-  while (WiFi.status() != WL_CONNECTED)  //&& retryCount < 10) {
+  while (WiFi.status() != WL_CONNECTED) //&& retryCount < 10) {
   {
     delay(1000);
     Serial.print(".");
-    digitalWrite(ledPinWiFi, !digitalRead(ledPinWiFi));  // LED berkedip
+    digitalWrite(ledPinWiFi, !digitalRead(ledPinWiFi)); // LED berkedip
     // retryCount++;
   }
 
-  if (WiFi.status() == WL_CONNECTED) {
+  if (WiFi.status() == WL_CONNECTED)
+  {
     Serial.println("");
     Serial.println("Reconnected to WiFi!");
     Serial.println(WiFi.localIP());
-    digitalWrite(ledPinWiFi, LOW);  // Matikan LED berkedip jika reconnect berhasil
-  } else {
+    digitalWrite(ledPinWiFi, LOW); // Matikan LED berkedip jika reconnect berhasil
+  }
+  else
+  {
     Serial.println("");
     Serial.println("Failed to reconnect to WiFi.");
   }
 }
 
-void serverSetup() {
+void serverSetup()
+{
   // Rute endpoint
-  server.on("/info", HTTP_GET, handleInfo);  // Akses: /info
+  server.on("/info", HTTP_GET, handleInfo); // Akses: /info
   server.on("/", handleRoot);
   server.on("/led1", HTTP_GET, getLed1);
   server.on("/led1", HTTP_POST, setLed1);
   server.on("/fan", HTTP_GET, getRelay);
   server.on("/fan", HTTP_POST, setRelay);
-  server.on("/mode", HTTP_GET, getMode);   // Lihat mode
-  server.on("/mode", HTTP_POST, setMode);  // Atur mode
+  server.on("/mode", HTTP_GET, getMode);  // Lihat mode
+  server.on("/mode", HTTP_POST, setMode); // Atur mode
   server.on("/data", readDHT11);
 
   server.begin();
   Serial.println("Web server started.");
 }
 
-void rgbSetup() {
+void rgbSetup()
+{
   // Atur frekuensi PWM, resolusi, dan pin
-  ledcSetup(RED_CHANNEL, 5000, 8);  // 5kHz, 8-bit
-  ledcAttachPin(RED_PIN, RED_CHANNEL);
+  ledSetup(RED_CHANNEL, 5000, 8); // 5kHz, 8-bit
+  ledAttachPin(RED_PIN, RED_CHANNEL);
 
-  ledcSetup(GREEN_CHANNEL, 5000, 8);  // 5kHz, 8-bit
-  ledcAttachPin(GREEN_PIN, GREEN_CHANNEL);
+  ledSetup(GREEN_CHANNEL, 5000, 8); // 5kHz, 8-bit
+  ledAttachPin(GREEN_PIN, GREEN_CHANNEL);
 
-  ledcSetup(BLUE_CHANNEL, 5000, 8);  // 5kHz, 8-bit
-  ledcAttachPin(BLUE_PIN, BLUE_CHANNEL);
+  ledSetup(BLUE_CHANNEL, 5000, 8); // 5kHz, 8-bit
+  ledAttachPin(BLUE_PIN, BLUE_CHANNEL);
 }
 
-void rgbLoop() {
-  // Ungu
-  ledcWrite(RED_CHANNEL,255);
-  ledcWrite(GREEN_CHANNEL,0);
-  ledcWrite(BLUE_CHANNEL,255);
+void rgbLoop()
+{
+  ledWrite(RED_CHANNEL, 255);
+  ledWrite(GREEN_CHANNEL, 0);
+  ledWrite(BLUE_CHANNEL, 255);
+  delay(1000);
+
   // Kuning
-  ledcWrite(RED_CHANNEL,255);
-  ledcWrite(GREEN_CHANNEL,255);
-  ledcWrite(BLUE_CHANNEL,0);
+  ledWrite(RED_CHANNEL, 255);
+  ledWrite(GREEN_CHANNEL, 255);
+  ledWrite(BLUE_CHANNEL, 0);
+  delay(1000);
+
   // Putih
-  ledcWrite(RED_CHANNEL,255);
-  ledcWrite(GREEN_CHANNEL,255);
-  ledcWrite(BLUE_CHANNEL,255);
+  ledWrite(RED_CHANNEL, 255);
+  ledWrite(GREEN_CHANNEL, 255);
+  ledWrite(BLUE_CHANNEL, 255);
+  delay(1000);
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   dhtSetup();
   ledSetup();
@@ -223,29 +250,36 @@ void setup() {
   rgbSetup();
 }
 
-void loop() {
+void loop()
+{
   // Auto reconnect jika WiFi terputus
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED)
+  {
     reconnectWiFi();
   }
 
+  rgbLoop();
   readPirMove();
   server.handleClient();
 }
 
-void setLed1() {
+void setLed1()
+{
   led1State = !led1State;
 
   digitalWrite(ledPin1, led1State ? HIGH : LOW);
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "text/plain", led1State ? "ON" : "OFF");
 }
-void getLed1() {
+void getLed1()
+{
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "text/plain", led1State ? "ON" : "OFF");
 }
-void setRelay() {
-  if (autoMode) {
+void setRelay()
+{
+  if (autoMode)
+  {
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.send(403, "text/plain", "Relay dikendalikan otomatis oleh sensor.");
     return;
@@ -257,23 +291,30 @@ void setRelay() {
   server.send(200, "text/plain", relayState ? "ON" : "OFF");
 }
 
-void getRelay() {
+void getRelay()
+{
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "text/plain", relayState ? "ON" : "OFF");
 }
 
-void getMode() {
+void getMode()
+{
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "text/plain", autoMode ? "AUTO" : "MANUAL");
 }
 
-void setMode() {
-  if (server.hasArg("mode")) {
+void setMode()
+{
+  if (server.hasArg("mode"))
+  {
     String modeArg = server.arg("mode");
-    if (modeArg == "AUTO") {
+    if (modeArg == "AUTO")
+    {
       digitalWrite(ledPinFlash, HIGH);
       autoMode = true;
-    } else if (modeArg == "MANUAL") {
+    }
+    else if (modeArg == "MANUAL")
+    {
       digitalWrite(ledPinFlash, LOW);
       autoMode = false;
     }
