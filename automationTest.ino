@@ -208,33 +208,33 @@ void serverSetup()
 void rgbSetup()
 {
   // Atur frekuensi PWM, resolusi, dan pin
-  ledSetup(RED_CHANNEL, 5000, 8); // 5kHz, 8-bit
-  ledAttachPin(RED_PIN, RED_CHANNEL);
+  ledcSetup(RED_CHANNEL, 5000, 8); // 5kHz, 8-bit
+  ledcAttachPin(RED_PIN, RED_CHANNEL);
 
-  ledSetup(GREEN_CHANNEL, 5000, 8); // 5kHz, 8-bit
-  ledAttachPin(GREEN_PIN, GREEN_CHANNEL);
+  ledcSetup(GREEN_CHANNEL, 5000, 8); // 5kHz, 8-bit
+  ledcAttachPin(GREEN_PIN, GREEN_CHANNEL);
 
-  ledSetup(BLUE_CHANNEL, 5000, 8); // 5kHz, 8-bit
-  ledAttachPin(BLUE_PIN, BLUE_CHANNEL);
+  ledcSetup(BLUE_CHANNEL, 5000, 8); // 5kHz, 8-bit
+  ledcAttachPin(BLUE_PIN, BLUE_CHANNEL);
 }
 
 void rgbLoop()
 {
-  ledWrite(RED_CHANNEL, 255);
-  ledWrite(GREEN_CHANNEL, 0);
-  ledWrite(BLUE_CHANNEL, 255);
+  ledcWrite(RED_CHANNEL, 255);
+  ledcWrite(GREEN_CHANNEL, 0);
+  ledcWrite(BLUE_CHANNEL, 255);
   delay(1000);
 
   // Kuning
-  ledWrite(RED_CHANNEL, 255);
-  ledWrite(GREEN_CHANNEL, 255);
-  ledWrite(BLUE_CHANNEL, 0);
+  ledcWrite(RED_CHANNEL, 255);
+  ledcWrite(GREEN_CHANNEL, 255);
+  ledcWrite(BLUE_CHANNEL, 0);
   delay(1000);
 
   // Putih
-  ledWrite(RED_CHANNEL, 255);
-  ledWrite(GREEN_CHANNEL, 255);
-  ledWrite(BLUE_CHANNEL, 255);
+  ledcWrite(RED_CHANNEL, 255);
+  ledcWrite(GREEN_CHANNEL, 255);
+  ledcWrite(BLUE_CHANNEL, 255);
   delay(1000);
 }
 
