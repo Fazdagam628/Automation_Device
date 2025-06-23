@@ -8,6 +8,15 @@ WebServer server(80);
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
+// Definisikan channel PWM untuk tiap warna
+#define RED_CHANNEL 0
+#define GREEN_CHANNEL 1
+#define BLUE_CHANNEL 2
+
+#define RED_PIN 12
+#define GREEN_PIN 13
+#define BLUE_PIN 14
+
 const char *ssid = "Indihon";
 const char *password = "12233344";
 // const char *ssid = "Redmi Note 13 Pro 5G";
@@ -145,7 +154,7 @@ void reconnectWiFi() {
   {
     delay(1000);
     Serial.print(".");
-    digitalWrite(ledPinWiFi, !digitalRead(ledPinWiFi)); // LED berkedip
+    digitalWrite(ledPinWiFi, !digitalRead(ledPinWiFi));  // LED berkedip
     // retryCount++;
   }
 
@@ -176,6 +185,33 @@ void serverSetup() {
   Serial.println("Web server started.");
 }
 
+void rgbSetup() {
+  // Atur frekuensi PWM, resolusi, dan pin
+  ledcSetup(RED_CHANNEL, 5000, 8);  // 5kHz, 8-bit
+  ledcAttachPin(RED_PIN, RED_CHANNEL);
+
+  ledcSetup(GREEN_CHANNEL, 5000, 8);  // 5kHz, 8-bit
+  ledcAttachPin(GREEN_PIN, GREEN_CHANNEL);
+
+  ledcSetup(BLUE_CHANNEL, 5000, 8);  // 5kHz, 8-bit
+  ledcAttachPin(BLUE_PIN, BLUE_CHANNEL);
+}
+
+void rgbLoop() {
+  // Ungu
+  ledcWrite(RED_CHANNEL,255);
+  ledcWrite(GREEN_CHANNEL,0);
+  ledcWrite(BLUE_CHANNEL,255);
+  // Kuning
+  ledcWrite(RED_CHANNEL,255);
+  ledcWrite(GREEN_CHANNEL,255);
+  ledcWrite(BLUE_CHANNEL,0);
+  // Putih
+  ledcWrite(RED_CHANNEL,255);
+  ledcWrite(GREEN_CHANNEL,255);
+  ledcWrite(BLUE_CHANNEL,255);
+}
+
 void setup() {
   Serial.begin(115200);
   dhtSetup();
@@ -184,6 +220,7 @@ void setup() {
   serverSetup();
   pirSetup();
   relaySetup();
+  rgbSetup();
 }
 
 void loop() {
